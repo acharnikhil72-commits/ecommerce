@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>ShopAPI — Ecommerce Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Syne:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0C0C0E;
+  --bg2:#141416;
+  --bg3:#1C1C1F;
+  --bg4:#242428;
+  --border:#2A2A2E;
+  --border2:#353539;
+  --gold:#C9973B;
+  --gold2:#E8B862;
+  --gold-dim:rgba(201,151,59,0.12);
+  --gold-dim2:rgba(201,151,59,0.2);
+  --text:#F0EDE8;
+  --text2:#A09C96;
+  --text3:#5A5854;
+  --success:#2D6A4F;
+  --success-bg:rgba(45,106,79,0.15);
+  --success-text:#4CAF7D;
+  --warn-bg:rgba(186,117,23,0.15);
+  --warn-text:#E8A020;
+  --danger-bg:rgba(163,45,45,0.15);
+  --danger-text:#E25555;
+}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Syne',sans-serif}
+ 
+/* ── LAYOUT ── */
+.shell{display:grid;grid-template-columns:260px 1fr;height:100vh;overflow:hidden}
+.sidebar{background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:0;overflow:hidden}
+.main{overflow-y:auto;background:var(--bg)}
+ 
+/* ── SIDEBAR ── */
+.logo-wrap{padding:2rem 1.75rem 1.5rem;border-bottom:1px solid var(--border)}
+.logo{font-family:'Cormorant Garamond',serif;font-size:1.7rem;font-weight:600;letter-spacing:0.04em;color:var(--text)}
+.logo em{color:var(--gold);font-style:normal}
+.logo-sub{font-size:11px;color:var(--text3);letter-spacing:0.15em;text-transform:uppercase;margin-top:3px}
+ 
+.nav{padding:1.5rem 1rem;flex:1;display:flex;flex-direction:column;gap:4px}
+.nav-label{font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:var(--text3);padding:0 0.75rem;margin:1rem 0 6px}
+.nav-item{display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:8px;cursor:pointer;font-size:13.5px;color:var(--text2);font-weight:400;transition:all 0.18s;border:none;background:none;width:100%;text-align:left;letter-spacing:0.01em}
+.nav-item:hover{background:var(--bg3);color:var(--text)}
+.nav-item.active{background:var(--gold-dim);color:var(--gold);border:1px solid var(--gold-dim2)}
+.nav-icon{width:16px;height:16px;opacity:0.7;flex-shrink:0}
+.nav-item.active .nav-icon{opacity:1}
+ 
+.sidebar-footer{padding:1.5rem 1.75rem;border-top:1px solid var(--border)}
+.version{font-size:11px;color:var(--text3);letter-spacing:0.08em}
+ 
+/* ── TOPBAR ── */
+.topbar{padding:2rem 2.5rem 0;display:flex;justify-content:space-between;align-items:flex-start}
+.page-heading{font-family:'Cormorant Garamond',serif;font-size:2.2rem;font-weight:500;color:var(--text);line-height:1}
+.page-sub{font-size:12px;color:var(--text3);margin-top:6px;letter-spacing:0.08em;text-transform:uppercase}
+.endpoint-badge{background:var(--gold-dim);border:1px solid var(--gold-dim2);color:var(--gold2);font-size:11px;padding:5px 14px;border-radius:20px;letter-spacing:0.05em;font-family:'Syne',sans-serif}
+ 
+/* ── CONTENT ── */
+.content{padding:2rem 2.5rem 3rem}
+.page{display:none}.page.active{display:block}
+ 
+/* ── STATS ── */
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:2rem}
+.stat{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:1.5rem;position:relative;overflow:hidden;transition:border 0.2s}
+.stat:hover{border-color:var(--border2)}
+.stat::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--gold),transparent)}
+.stat-label{font-size:11px;text-transform:uppercase;letter-spacing:0.12em;color:var(--text3);margin-bottom:0.75rem}
+.stat-val{font-family:'Cormorant Garamond',serif;font-size:2.4rem;font-weight:500;color:var(--gold);line-height:1}
+.stat-val.plain{color:var(--text)}
+.stat-hint{font-size:11px;color:var(--text3);margin-top:6px}
+ 
+/* ── CARDS ── */
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:1.75rem;margin-bottom:1.5rem}
+.card-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem}
+.card-title{font-size:14px;font-weight:500;color:var(--text);letter-spacing:0.02em}
+.card-hint{font-size:12px;color:var(--text3)}
+ 
+/* ── TABLE ── */
+.table{width:100%;border-collapse:collapse}
+.table th{font-size:10.5px;text-transform:uppercase;letter-spacing:0.12em;color:var(--text3);font-weight:500;text-align:left;padding:0 0 1rem;border-bottom:1px solid var(--border)}
+.table td{padding:1rem 0;border-bottom:1px solid var(--border);font-size:13.5px;vertical-align:middle}
+.table tr:last-child td{border-bottom:none}
+.table tr{transition:background 0.15s}
+.table tbody tr:hover td{background:var(--bg3);padding-left:8px;padding-right:8px;border-radius:6px}
+ 
+/* ── PILL ── */
+.pill{display:inline-block;padding:3px 11px;border-radius:20px;font-size:11px;font-weight:500;letter-spacing:0.04em}
+.pill-green{background:var(--success-bg);color:var(--success-text)}
+.pill-amber{background:var(--warn-bg);color:var(--warn-text)}
+.pill-red{background:var(--danger-bg);color:var(--danger-text)}
+.pill-gold{background:var(--gold-dim);color:var(--gold2)}
+ 
+/* ── FORM ── */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.25rem}
+.form-group{display:flex;flex-direction:column;gap:8px}
+.form-group.full{grid-column:1/-1}
+label{font-size:11.5px;text-transform:uppercase;letter-spacing:0.1em;color:var(--text3)}
+input,select{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:11px 14px;font-size:13.5px;color:var(--text);font-family:'Syne',sans-serif;outline:none;width:100%;transition:border 0.2s,background 0.2s}
+input:focus,select:focus{border-color:var(--gold);background:var(--bg4)}
+input::placeholder{color:var(--text3)}
+ 
+/* ── BUTTONS ── */
+.btn{padding:11px 22px;border-radius:8px;font-size:13px;font-family:'Syne',sans-serif;cursor:pointer;font-weight:500;transition:all 0.2s;border:none;letter-spacing:0.03em}
+.btn-gold{background:var(--gold);color:#0C0C0E}
+.btn-gold:hover{background:var(--gold2);transform:translateY(-1px)}
+.btn-gold:active{transform:translateY(0)}
+.btn-outline{background:none;border:1px solid var(--border2);color:var(--text2)}
+.btn-outline:hover{border-color:var(--gold);color:var(--gold)}
+.btn-ghost{background:none;border:1px solid var(--border);color:var(--text3);padding:7px 14px;font-size:12px}
+.btn-ghost:hover{border-color:var(--danger-text);color:var(--danger-text)}
+.btn-sm{padding:7px 14px;font-size:12px}
+ 
+/* ── CART ── */
+.cart-item{display:flex;align-items:center;justify-content:space-between;padding:1rem 0;border-bottom:1px solid var(--border);gap:1rem}
+.cart-item:last-child{border-bottom:none}
+.cart-avatar{width:42px;height:42px;border-radius:8px;background:var(--bg4);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:1.2rem;color:var(--gold);flex-shrink:0}
+.cart-info{flex:1}
+.cart-name{font-size:14px;font-weight:500;color:var(--text)}
+.cart-meta{font-size:12px;color:var(--text3);margin-top:2px}
+.cart-price{font-family:'Cormorant Garamond',serif;font-size:1.3rem;color:var(--gold2);white-space:nowrap}
+ 
+/* ── TOTAL BAR ── */
+.total-bar{background:var(--bg3);border:1px solid var(--gold-dim2);border-radius:10px;padding:1.25rem 1.5rem;display:flex;justify-content:space-between;align-items:center;margin-top:1.25rem}
+.total-label{font-size:12px;text-transform:uppercase;letter-spacing:0.1em;color:var(--text3)}
+.total-amt{font-family:'Cormorant Garamond',serif;font-size:2rem;color:var(--gold);font-weight:500}
+ 
+/* ── ENDPOINTS ── */
+.ep-list{display:flex;flex-direction:column;gap:10px}
+.ep{display:flex;align-items:center;gap:14px;padding:14px 16px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;transition:border 0.2s}
+.ep:hover{border-color:var(--border2)}
+.method{font-size:10.5px;font-weight:600;padding:4px 10px;border-radius:6px;font-family:'Syne',sans-serif;min-width:46px;text-align:center;letter-spacing:0.05em}
+.m-get{background:var(--success-bg);color:var(--success-text)}
+.m-post{background:rgba(24,95,165,0.15);color:#5BA8F5}
+.ep-path{font-family:monospace;font-size:13px;color:var(--text);flex:1}
+.ep-desc{font-size:12px;color:var(--text3)}
+.ep-service{font-size:11px;color:var(--gold);background:var(--gold-dim);padding:3px 10px;border-radius:20px;white-space:nowrap}
+ 
+/* ── EMPTY STATE ── */
+.empty{text-align:center;padding:3rem 0}
+.empty-icon{font-size:2.5rem;margin-bottom:1rem;opacity:0.3}
+.empty-text{color:var(--text3);font-size:14px}
+ 
+/* ── TOAST ── */
+.toast{position:fixed;bottom:2rem;right:2rem;background:var(--bg3);border:1px solid var(--gold-dim2);color:var(--text);padding:14px 20px;border-radius:10px;font-size:13.5px;display:none;align-items:center;gap:12px;z-index:9999;box-shadow:0 8px 40px rgba(0,0,0,0.5);animation:slideUp 0.3s ease}
+.toast.show{display:flex}
+@keyframes slideUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.toast-dot{width:7px;height:7px;border-radius:50%;background:var(--gold);flex-shrink:0}
+ 
+/* ── PAGE ENTER ANIM ── */
+.page.active{animation:fadeIn 0.25s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+ 
+/* ── DIVIDER ── */
+.divider{height:1px;background:var(--border);margin:1.5rem 0}
+ 
+.id-chip{font-size:11px;color:var(--text3);background:var(--bg4);padding:3px 8px;border-radius:5px;font-family:monospace}
+</style>
+</head>
+<body>
+ 
+<div class="shell">
+ 
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="logo-wrap">
+      <div class="logo">Shop<em>API</em></div>
+      <div class="logo-sub">Ecommerce Dashboard</div>
+    </div>
+    <nav class="nav">
+      <div class="nav-label">Catalogue</div>
+      <button class="nav-item active" onclick="nav('products',this)">
+        <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M20 7H4a2 2 0 00-2 2v10a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2z"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg>
+        All Products
+      </button>
+      <button class="nav-item" onclick="nav('add',this)">
+        <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg>
+        Add Product
+      </button>
+      <div class="nav-label">Orders</div>
+      <button class="nav-item" onclick="nav('cart',this)">
+        <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+        Cart
+        <span id="cart-badge" style="margin-left:auto;background:var(--gold);color:#0C0C0E;font-size:10px;padding:2px 7px;border-radius:20px;display:none"></span>
+      </button>
+      <button class="nav-item" onclick="nav('checkout',this)">
+        <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        Checkout
+      </button>
+      <div class="nav-label">Developer</div>
+      <button class="nav-item" onclick="nav('api',this)">
+        <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+        API Reference
+      </button>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="version">Spring Boot · JPA · Lombok</div>
+      <div style="font-size:11px;color:var(--text3);margin-top:4px">localhost:8080</div>
+    </div>
+  </aside>
+ 
+  <!-- MAIN -->
+  <main class="main">
+ 
+    <!-- PRODUCTS PAGE -->
+    <div id="page-products" class="page active">
+      <div class="topbar">
+        <div>
+          <div class="page-heading">Products</div>
+          <div class="page-sub">Catalogue Management</div>
+        </div>
+        <span class="endpoint-badge">GET /AllProducts</span>
+      </div>
+      <div class="content">
+        <div class="stats">
+          <div class="stat">
+            <div class="stat-label">Total Products</div>
+            <div class="stat-val" id="s-total">0</div>
+            <div class="stat-hint">in catalogue</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">In Stock</div>
+            <div class="stat-val plain" id="s-stock">0</div>
+            <div class="stat-hint">qty &gt; 5</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Avg Price</div>
+            <div class="stat-val" id="s-avg">₹0</div>
+            <div class="stat-hint">across catalogue</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title">All Products</div>
+            <div class="card-hint" id="product-count">0 items</div>
+          </div>
+          <table class="table">
+            <thead>
+              <tr>
+                <th>ID</th><th>Name</th><th>Price</th><th>Quantity</th><th>Status</th><th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="product-table"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+ 
+    <!-- ADD PRODUCT PAGE -->
+    <div id="page-add" class="page">
+      <div class="topbar">
+        <div>
+          <div class="page-heading">Add Product</div>
+          <div class="page-sub">POST /addProducts</div>
+        </div>
+        <span class="endpoint-badge">C_Service · addProducts()</span>
+      </div>
+      <div class="content">
+        <div class="card" style="max-width:580px">
+          <div class="card-head">
+            <div class="card-title">New Product Details</div>
+          </div>
+          <div class="form-grid">
+            <div class="form-group full">
+              <label>Product Name</label>
+              <input id="p-name" placeholder="e.g. Wireless Headphones"/>
+            </div>
+            <div class="form-group">
+              <label>Price (₹)</label>
+              <input id="p-price" type="number" placeholder="1999"/>
+            </div>
+            <div class="form-group">
+              <label>Quantity</label>
+              <input id="p-qty" type="number" placeholder="10"/>
+            </div>
+          </div>
+          <div style="display:flex;gap:10px;margin-top:0.5rem">
+            <button class="btn btn-gold" onclick="addProduct()">Save Product</button>
+            <button class="btn btn-outline" onclick="clearForm()">Clear</button>
+          </div>
+        </div>
+ 
+        <div class="card" style="max-width:580px">
+          <div class="card-head">
+            <div class="card-title">Request Body Preview</div>
+            <span class="pill pill-gold">JSON</span>
+          </div>
+          <pre id="json-preview" style="font-family:monospace;font-size:12.5px;color:var(--text2);line-height:1.8;background:var(--bg3);padding:1rem;border-radius:8px;border:1px solid var(--border)">
+{
+  "P_name": "...",
+  "P_price": 0,
+  "P_quantity": "0"
+}</pre>
+        </div>
+      </div>
+    </div>
+ 
+    <!-- CART PAGE -->
+    <div id="page-cart" class="page">
+      <div class="topbar">
+        <div>
+          <div class="page-heading">Cart</div>
+          <div class="page-sub">POST /add_to_cart</div>
+        </div>
+        <span class="endpoint-badge">C_Service · addToCart()</span>
+      </div>
+      <div class="content">
+        <div class="card" style="max-width:560px">
+          <div class="card-head">
+            <div class="card-title">Cart Items</div>
+            <div class="card-hint" id="cart-count">0 items</div>
+          </div>
+          <div id="cart-items"></div>
+          <div class="total-bar">
+            <div>
+              <div class="total-label">Subtotal</div>
+              <div style="font-size:11px;color:var(--text3);margin-top:2px">before tax</div>
+            </div>
+            <div class="total-amt" id="cart-subtotal">₹0</div>
+          </div>
+          <button class="btn btn-gold" style="width:100%;margin-top:1rem;padding:14px" onclick="nav('checkout',null)">
+            Proceed to Checkout →
+          </button>
+        </div>
+      </div>
+    </div>
+ 
+    <!-- CHECKOUT PAGE -->
+    <div id="page-checkout" class="page">
+      <div class="topbar">
+        <div>
+          <div class="page-heading">Checkout</div>
+          <div class="page-sub">GET /buynow · calculateTotalPrice()</div>
+        </div>
+        <span class="endpoint-badge">C_Service · calculateTotalPrice()</span>
+      </div>
+      <div class="content">
+        <div style="display:grid;grid-template-columns:1fr 360px;gap:1.5rem;align-items:start">
+          <div class="card">
+            <div class="card-head"><div class="card-title">Order Summary</div></div>
+            <div id="checkout-items"></div>
+          </div>
+          <div>
+            <div class="card">
+              <div class="card-head"><div class="card-title">Price Breakdown</div></div>
+              <div style="display:flex;flex-direction:column;gap:12px;font-size:13.5px">
+                <div style="display:flex;justify-content:space-between"><span style="color:var(--text2)">Subtotal</span><span id="co-sub">₹0</span></div>
+                <div style="display:flex;justify-content:space-between"><span style="color:var(--text2)">Tax (18% GST)</span><span id="co-tax">₹0</span></div>
+                <div class="divider" style="margin:0.25rem 0"></div>
+                <div style="display:flex;justify-content:space-between;font-size:1.1rem">
+                  <span style="color:var(--text)">Total</span>
+                  <span id="co-total" style="font-family:'Cormorant Garamond',serif;font-size:1.5rem;color:var(--gold)">₹0</span>
+                </div>
+              </div>
+              <button class="btn btn-gold" style="width:100%;margin-top:1.5rem;padding:14px;font-size:14px" onclick="placeOrder()">
+                Place Order & Clear Cart
+              </button>
+              <div style="font-size:11px;color:var(--text3);text-align:center;margin-top:10px">
+                Cart will be deleted from DB after order
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+ 
+    <!-- API REFERENCE PAGE -->
+    <div id="page-api" class="page">
+      <div class="topbar">
+        <div>
+          <div class="page-heading">API Reference</div>
+          <div class="page-sub">Controller · Service · Repository</div>
+        </div>
+      </div>
+      <div class="content">
+        <div class="card">
+          <div class="card-head"><div class="card-title">Controller Endpoints</div><span class="pill pill-gold">5 routes</span></div>
+          <div class="ep-list">
+            <div class="ep"><span class="method m-post">POST</span><span class="ep-path">/addProducts</span><span class="ep-desc">Save new product</span><span class="ep-service">addProducts()</span></div>
+            <div class="ep"><span class="method m-get">GET</span><span class="ep-path">/AllProducts</span><span class="ep-desc">Fetch all products</span><span class="ep-service">getAllProducts()</span></div>
+            <div class="ep"><span class="method m-get">GET</span><span class="ep-path">/AllProducts/getproduct/{id}</span><span class="ep-desc">Get product by ID</span><span class="ep-service">getProductsById()</span></div>
+            <div class="ep"><span class="method m-post">POST</span><span class="ep-path">/AllProducts/getproduct/{id}/add_to_cart</span><span class="ep-desc">Fetch product → add to cart</span><span class="ep-service">FetchFromProduct()</span></div>
+            <div class="ep"><span class="method m-get">GET</span><span class="ep-path">/getproduct/add_to_cart/{cartId}/buynow</span><span class="ep-desc">Calculate total · delete cart</span><span class="ep-service">calculateTotalPrice()</span></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head"><div class="card-title">Service Flow</div></div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem">
+            <div style="background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:1.25rem">
+              <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.1em;color:var(--text3);margin-bottom:10px">Product</div>
+              <div style="font-size:13px;display:flex;flex-direction:column;gap:6px">
+                <span style="color:var(--gold)">addProducts()</span>
+                <span style="color:var(--text2)">getAllProducts()</span>
+                <span style="color:var(--text2)">getProductsById()</span>
+                <span style="color:var(--text2)">FetchFromProduct()</span>
+              </div>
+            </div>
+            <div style="background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:1.25rem">
+              <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.1em;color:var(--text3);margin-bottom:10px">Cart</div>
+              <div style="font-size:13px;display:flex;flex-direction:column;gap:6px">
+                <span style="color:var(--gold)">addToCart()</span>
+                <span style="color:var(--text2)">getCartById()</span>
+                <span style="color:var(--text2)">calculateTotalPrice()</span>
+              </div>
+            </div>
+            <div style="background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:1.25rem">
+              <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.1em;color:var(--text3);margin-bottom:10px">Repositories</div>
+              <div style="font-size:13px;display:flex;flex-direction:column;gap:6px">
+                <span style="color:var(--gold)">P_Repository</span>
+                <span style="color:var(--text2)">JpaRepository&lt;Products&gt;</span>
+                <span style="color:var(--gold);margin-top:6px">C_Repository</span>
+                <span style="color:var(--text2)">JpaRepository&lt;Cart&gt;</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+ 
+  </main>
+</div>
+ 
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <span class="toast-dot"></span>
+  <span id="toast-msg">Done</span>
+</div>
+ 
+<script>
+let products=[
+  {id:1,name:'Wireless Headphones',price:2499,qty:'12'},
+  {id:2,name:'USB-C Hub',price:1299,qty:'5'},
+  {id:3,name:'Mechanical Keyboard',price:4999,qty:'8'},
+  {id:4,name:'Webcam HD 1080p',price:3200,qty:'3'}
+];
+let cart=[];
+let nextId=5;
+ 
+function nav(page,btn){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('page-'+page).classList.add('active');
+  if(btn)btn.classList.add('active');
+  else{
+    document.querySelectorAll('.nav-item').forEach(n=>{
+      if(n.getAttribute('onclick')&&n.getAttribute('onclick').includes("'"+page+"'"))n.classList.add('active');
+    });
+  }
+  if(page==='products')renderProducts();
+  if(page==='cart')renderCart();
+  if(page==='checkout')renderCheckout();
+}
+ 
+function renderProducts(){
+  const tbody=document.getElementById('product-table');
+  tbody.innerHTML=products.map(p=>{
+    const q=parseInt(p.qty);
+    const status=q>5?'<span class="pill pill-green">In Stock</span>':q>0?'<span class="pill pill-amber">Low Stock</span>':'<span class="pill pill-red">Out of Stock</span>';
+    return`<tr>
+      <td><span class="id-chip">#${p.id}</span></td>
+      <td style="font-weight:500">${p.name}</td>
+      <td style="font-family:'Cormorant Garamond',serif;font-size:1.1rem">₹${p.price.toLocaleString()}</td>
+      <td>${p.qty}</td>
+      <td>${status}</td>
+      <td><button class="btn btn-ghost btn-sm" onclick="addToCart(${p.id})">+ Add to Cart</button></td>
+    </tr>`;
+  }).join('');
+  document.getElementById('s-total').textContent=products.length;
+  document.getElementById('s-stock').textContent=products.filter(p=>parseInt(p.qty)>5).length;
+  const avg=products.length?Math.round(products.reduce((s,p)=>s+p.price,0)/products.length):0;
+  document.getElementById('s-avg').textContent='₹'+avg.toLocaleString();
+  document.getElementById('product-count').textContent=products.length+' items';
+}
+ 
+function addProduct(){
+  const name=document.getElementById('p-name').value.trim();
+  const price=parseInt(document.getElementById('p-price').value)||0;
+  const qty=document.getElementById('p-qty').value.trim();
+  if(!name||!price||!qty){showToast('Please fill all fields');return;}
+  products.push({id:nextId++,name,price,qty});
+  clearForm();
+  renderProducts();
+  showToast('Product saved successfully');
+}
+ 
+function clearForm(){
+  ['p-name','p-price','p-qty'].forEach(id=>document.getElementById(id).value='');
+  updatePreview();
+}
+ 
+function updatePreview(){
+  const name=document.getElementById('p-name')?.value||'...';
+  const price=document.getElementById('p-price')?.value||0;
+  const qty=document.getElementById('p-qty')?.value||'0';
+  document.getElementById('json-preview').textContent=`{\n  "P_name": "${name}",\n  "P_price": ${price},\n  "P_quantity": "${qty}"\n}`;
+}
+ 
+['p-name','p-price','p-qty'].forEach(id=>{
+  setTimeout(()=>{
+    const el=document.getElementById(id);
+    if(el)el.addEventListener('input',updatePreview);
+  },100);
+});
+ 
+function addToCart(id){
+  const p=products.find(x=>x.id===id);
+  if(!p)return;
+  const ex=cart.find(c=>c.id===id);
+  if(ex){ex.qty++;}else{cart.push({id:p.id,name:p.name,price:p.price,qty:1});}
+  updateCartBadge();
+  showToast(p.name+' added to cart');
+}
+ 
+function removeFromCart(id){
+  cart=cart.filter(c=>c.id!==id);
+  updateCartBadge();
+  renderCart();
+}
+ 
+function updateCartBadge(){
+  const badge=document.getElementById('cart-badge');
+  const total=cart.reduce((s,c)=>s+c.qty,0);
+  if(total>0){badge.textContent=total;badge.style.display='inline';}
+  else{badge.style.display='none';}
+}
+ 
+function renderCart(){
+  const el=document.getElementById('cart-items');
+  document.getElementById('cart-count').textContent=cart.length+' items';
+  if(!cart.length){
+    el.innerHTML='<div class="empty"><div class="empty-icon">◻</div><div class="empty-text">Cart is empty — add products from the catalogue</div></div>';
+    document.getElementById('cart-subtotal').textContent='₹0';
+    return;
+  }
+  el.innerHTML=cart.map(c=>`
+    <div class="cart-item">
+      <div class="cart-avatar">${c.name[0]}</div>
+      <div class="cart-info">
+        <div class="cart-name">${c.name}</div>
+        <div class="cart-meta">₹${c.price.toLocaleString()} × ${c.qty} unit${c.qty>1?'s':''}</div>
+      </div>
+      <div class="cart-price">₹${(c.price*c.qty).toLocaleString()}</div>
+      <button class="btn btn-ghost" onclick="removeFromCart(${c.id})">✕</button>
+    </div>`).join('');
+  const sub=cart.reduce((s,c)=>s+c.price*c.qty,0);
+  document.getElementById('cart-subtotal').textContent='₹'+sub.toLocaleString();
+}
+ 
+function renderCheckout(){
+  const el=document.getElementById('checkout-items');
+  if(!cart.length){
+    el.innerHTML='<div class="empty"><div class="empty-icon">◻</div><div class="empty-text">No items in cart</div></div>';
+    ['co-sub','co-tax','co-total'].forEach(id=>document.getElementById(id).textContent='₹0');
+    return;
+  }
+  el.innerHTML=cart.map(c=>`
+    <div class="cart-item">
+      <div class="cart-avatar">${c.name[0]}</div>
+      <div class="cart-info">
+        <div class="cart-name">${c.name}</div>
+        <div class="cart-meta">qty: ${c.qty}</div>
+      </div>
+      <div class="cart-price">₹${(c.price*c.qty).toLocaleString()}</div>
+    </div>`).join('');
+  const sub=cart.reduce((s,c)=>s+c.price*c.qty,0);
+  const tax=Math.round(sub*0.18);
+  const total=sub+tax;
+  document.getElementById('co-sub').textContent='₹'+sub.toLocaleString();
+  document.getElementById('co-tax').textContent='₹'+tax.toLocaleString();
+  document.getElementById('co-total').textContent='₹'+total.toLocaleString();
+}
+ 
+function placeOrder(){
+  if(!cart.length){showToast('Cart is empty');return;}
+  cart=[];
+  updateCartBadge();
+  renderCheckout();
+  showToast('Order placed! Cart cleared from DB.');
+}
+ 
+function showToast(msg){
+  const t=document.getElementById('toast');
+  document.getElementById('toast-msg').textContent=msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3000);
+}
+ 
+renderProducts();
+</script>
+</body>
+</html>
